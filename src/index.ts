@@ -3,6 +3,7 @@ import { PORT } from "./secreate";
 import rootRouter from "./routes";
 import { PrismaClient} from "@prisma/client";
 import { errorMiddleware } from "./middlewares/errors";
+// import authMiddleware from "./middlewares/auth";
 
 const app:Express = express() 
 
@@ -17,5 +18,6 @@ export const Prismaclient = new PrismaClient({
 })
 
 app.use(errorMiddleware)
+// app.use(authMiddleware)
 
-app.listen(PORT, ()=>{console.log('App woring...')})
+app.listen(PORT, ()=>{console.log(' the server is  working...')})

@@ -1,4 +1,3 @@
-// import { PrismaClient } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { Prismaclient } from "..";
 import { hashSync,compareSync } from "bcrypt";
@@ -9,14 +8,14 @@ import { ErrorCode } from "../exeptions/root";
 import { UnprocessableEntity } from "../exeptions/validation";
 import { SignUpSchema } from "../schema/users";
 import { NotFoundExeption } from "../exeptions/not_found";
+import { InternalExeption } from "../exeptions/internalexeption";
 
 
-export const signUp = async (req:Request,res:Response,next:NextFunction)=>{
-
+export const signup = async (req:Request,res:Response,next:NextFunction):Promise<Response<any, Record<string, any>> | undefined>=>{
     try{
         SignUpSchema.parse(req.body);
         const {email, password, name} = req.body;
-    
+
         let user = await Prismaclient.user.findFirst({where:{email}});
         
         if(user){
@@ -39,16 +38,24 @@ export const signUp = async (req:Request,res:Response,next:NextFunction)=>{
         })
        return res.json(user)
     }catch(error:any){
-
-     const Unprocessable  = new UnprocessableEntity(error?.issues, 'Unprocessable entity',ErrorCode.UNPROCESSABLE_ENTITY)
-     return res.status(Unprocessable.statusCode).json({
-        error:Unprocessable.errors,
-        message: Unprocessable.message,
-        errorCode: ErrorCode.USER_ALREADY_EXISTS
-    });
-    }
-   
+        try {
+            const Unprocessable  = new UnprocessableEntity(error?.issues, 'Unprocessable entity',ErrorCode.UNPROCESSABLE_ENTITY)
+            return res.status(Unprocessable.statusCode).json({
+               error:Unprocessable.errors,
+               message: Unprocessable.message,
+               errorCode: ErrorCode.USER_ALREADY_EXISTS
+           });
+        } catch (error) {
+            const  exeptions = new InternalExeption('sonmething when wrong',error,ErrorCode.INTERNAL_EXCEPTION_HANDELING)
+            res.status(exeptions.statusCode).json({
+                error:exeptions.errors,
+                message:exeptions.message,
+                errorCode: ErrorCode.INTERNAL_EXCEPTION_HANDELING
+               })
+        }
+    }  
 }
+
 
 export const login = async (req:Request,res:Response)=>{
     const {email, password,} = req.body;
@@ -56,11 +63,15 @@ export const login = async (req:Request,res:Response)=>{
     let user = await Prismaclient.user.findFirst({where:{email}})
     
     if(!user){
-        throw new NotFoundExeption('User not found',ErrorCode.USER_NOT_FOUND)
+       const usernotfound = new NotFoundExeption('User not found',ErrorCode.USER_NOT_FOUND)
+       return res.status(usernotfound.statusCode).json({
+        error:usernotfound.errors,
+        message:usernotfound.message,
+        ErrorCode:ErrorCode.USER_NOT_FOUND
+       })
     }
     if(!compareSync(password,user.password)){
         const badrequest = new BadrequestExeption('Incorrect Password!', ErrorCode.USER_ALREADY_EXISTS)
-
         return res.status(badrequest.statusCode).json({
             error:badrequest.errors,
             message: badrequest.message,
@@ -71,6 +82,8 @@ export const login = async (req:Request,res:Response)=>{
     const token = jwt.sign({
         userId : user.id
     },JWT_SECRET)
-
     res.json({user,token})
+}
+export const me = async (req:Request,res:Response,next:NextFunction)=>{
+    res.json(req.user)
 }
