@@ -57,6 +57,7 @@ export const signup = async (req:Request,res:Response,next:NextFunction):Promise
 }
 
 
+
 export const login = async (req:Request,res:Response)=>{
     const {email, password,} = req.body;
     
@@ -68,7 +69,7 @@ export const login = async (req:Request,res:Response)=>{
         error:usernotfound.errors,
         message:usernotfound.message,
         ErrorCode:ErrorCode.USER_NOT_FOUND
-       })
+       });
     }
     if(!compareSync(password,user.password)){
         const badrequest = new BadrequestExeption('Incorrect Password!', ErrorCode.USER_ALREADY_EXISTS)

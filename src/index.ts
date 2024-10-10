@@ -10,6 +10,7 @@ const app:Express = express()
 app.use(express.json())
 
 
+
 app.use('/api',rootRouter);
 
 
@@ -18,6 +19,7 @@ export const Prismaclient = new PrismaClient({
 })
 
 app.use(errorMiddleware)
+
 // app.use(authMiddleware)
 
-app.listen(PORT, ()=>{console.log(' the server is  working...')})
+app.listen(PORT, ()=>{console.log('the server is  working...')})

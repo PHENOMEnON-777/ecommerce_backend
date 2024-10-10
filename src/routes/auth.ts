@@ -7,8 +7,14 @@ const authRoutes: Router = Router();
 
 authRoutes.post('/signup', signup);
 
+
+
 authRoutes.post('/login', login);
 
+
+
 authRoutes.get('/me', authMiddleware, me);
+
+
 
 export default authRoutes;
