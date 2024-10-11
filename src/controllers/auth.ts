@@ -51,7 +51,7 @@ export const signup = async (req:Request,res:Response,next:NextFunction):Promise
                 error:exeptions.errors,
                 message:exeptions.message,
                 errorCode: ErrorCode.INTERNAL_EXCEPTION_HANDELING
-               })
+               });
         }
     }  
 }
